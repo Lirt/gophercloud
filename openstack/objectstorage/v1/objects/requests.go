@@ -466,6 +466,12 @@ func timeNow() time.Time {
 	return NowFunc().UTC()
 }
 
+func resetClockImplementation() {
+	NowFunc = func() time.Time {
+		return time.Now()
+	}
+}
+
 // CreateTempURL is a function for creating a temporary URL for an object. It
 // allows users to have "GET" or "POST" access to a particular tenant's object
 // for a limited amount of time.
@@ -473,6 +479,7 @@ func CreateTempURL(c *gophercloud.ServiceClient, containerName, objectName strin
 	if opts.Split == "" {
 		opts.Split = "/v1/"
 	}
+	resetClockImplementation()
 	duration := time.Duration(opts.TTL) * time.Second
 	expiry := timeNow().Add(duration).Unix()
 	getHeader, err := containers.Get(c, url.QueryEscape(containerName), nil).Extract()
